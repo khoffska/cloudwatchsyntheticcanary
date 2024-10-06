@@ -5,16 +5,6 @@ variable "cloudwatch_map" {
     zip_file        = string
   }))
   default = {
-    "domino" = {
-      name            = "domino"
-      sns_topic_email = "hoffstad@gmail.com"
-      zip_file        = "src/domino.zip"
-    },
-    "aetion" = {
-      name            = "aetion"
-      sns_topic_email = "discwat@gmail.com"
-      zip_file        = "src/aetion.zip"
-    },
     "google" = {
       name            = "google"
       sns_topic_email = "hoffstad@gmail.com"
