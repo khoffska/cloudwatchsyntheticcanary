@@ -366,3 +366,7 @@ FodyWeavers.xsd
 *.tfstate.backup
 .terraform
 .terraform.lock.hcl
+
+# Canary deployment zips are built from src/*.py by data.archive_file — not committed
+/build/
+src/*.zip
