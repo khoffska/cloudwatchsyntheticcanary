@@ -5,14 +5,18 @@
 # The Synthetics Python runtime loads the handler module from a top-level
 # "python/" folder inside the zip, so the .py must live at python/<name>.py
 # (the module name must match the handler's "<name>.handler").
+#
+# aws_synthetics_canary only diffs the zip_file *path*, not its contents, so the
+# source hash is baked into output_path. That way any edit to a canary .py yields
+# a new path and forces the canary to re-upload its code on the next apply.
 data "archive_file" "canary" {
   for_each = var.cloudwatch_map
 
   type        = "zip"
-  output_path = "${path.module}/build/${each.value.name}.zip"
+  output_path = "${path.module}/build/${each.value.name}-${filemd5(local.canaries[each.key].source_path)}.zip"
 
   source {
-    content  = file("${path.module}/src/${local.canaries[each.key].source_name}.py")
+    content  = file(local.canaries[each.key].source_path)
     filename = "python/${local.canaries[each.key].source_name}.py"
   }
 }
