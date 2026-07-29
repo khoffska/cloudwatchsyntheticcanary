@@ -37,7 +37,7 @@ variable "artifact_s3_bucket" {
 variable "runtime_version" {
   type        = string
   description = "Synthetics runtime version."
-  default     = "syn-python-selenium-2.0"
+  default     = "syn-python-selenium-11.1"
 }
 
 variable "schedule_expression" {
