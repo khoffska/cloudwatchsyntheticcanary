@@ -5,7 +5,7 @@ from aws_synthetics.common import synthetics_logger as logger
 
 def main():
 
-    url = "google.com"
+    url = "https://www.google.com"
 
     # Set screenshot option
     takeScreenshot = True
