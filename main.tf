@@ -5,6 +5,7 @@ locals {
   canaries = {
     for k, c in var.cloudwatch_map : k => {
       source_name = c.type == "api" ? "api_canary" : c.name
+      source_path = "${path.module}/src/${c.type == "api" ? "api_canary" : c.name}.py"
       handler     = c.type == "api" ? "api_canary.handler" : "${c.name}.handler"
       environment_variables = c.type == "api" ? {
         API_ENDPOINT = c.endpoint
