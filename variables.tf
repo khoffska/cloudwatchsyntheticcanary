@@ -1,7 +1,7 @@
 variable "artifact_bucket_name" {
   type        = string
   description = "Name of the shared S3 bucket that stores canary run artifacts."
-  default     = "synthcanlogz123123"
+  default     = "synthcanlogz1231233"
 }
 
 variable "cloudwatch_map" {
