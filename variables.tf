@@ -11,6 +11,13 @@ variable "cloudwatch_map" {
     type            = optional(string, "browser") # "browser" | "api"
     endpoint        = optional(string)            # required when type == "api"
     method          = optional(string, "GET")
+    # Optional API response assertions (type == "api" only). Any unset check is skipped.
+    expected_status = optional(number)      # assert an exact status code instead of any 2xx
+    max_latency_ms  = optional(number)      # fail if the response is slower than this
+    body_contains   = optional(string)      # assert this substring is present in the body
+    json_assertions = optional(map(string)) # assert dotted JSON paths equal these values
+    request_headers = optional(map(string)) # request headers (e.g. Authorization) — see security note
+    request_body    = optional(string)      # raw request body for POST/PUT
   }))
   default = {
     "google" = {
@@ -26,6 +33,20 @@ variable "cloudwatch_map" {
       sns_topic_email = "hoffstad@gmail.com"
       type            = "api"
       endpoint        = "https://httpbin.org/status/200"
+      expected_status = 200
+      max_latency_ms  = 3000
+    },
+    "httpbin-json" = {
+      name            = "httpbin-json"
+      sns_topic_email = "hoffstad@gmail.com"
+      type            = "api"
+      endpoint        = "https://httpbin.org/json"
+      expected_status = 200
+      max_latency_ms  = 3000
+      body_contains   = "slideshow"
+      json_assertions = {
+        "slideshow.title" = "Sample Slide Show"
+      }
     }
   }
 

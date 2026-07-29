@@ -7,10 +7,20 @@ locals {
       source_name = c.type == "api" ? "api_canary" : c.name
       source_path = "${path.module}/src/${c.type == "api" ? "api_canary" : c.name}.py"
       handler     = c.type == "api" ? "api_canary.handler" : "${c.name}.handler"
-      environment_variables = c.type == "api" ? {
-        API_ENDPOINT = c.endpoint
-        API_METHOD   = c.method
-      } : {}
+      # API canaries are parameterized entirely via env vars; only include the
+      # optional assertion vars that are actually set so the runtime skips the rest.
+      environment_variables = c.type != "api" ? {} : merge(
+        {
+          API_ENDPOINT = c.endpoint
+          API_METHOD   = c.method
+        },
+        c.expected_status == null ? {} : { API_EXPECTED_STATUS = tostring(c.expected_status) },
+        c.max_latency_ms == null ? {} : { API_MAX_LATENCY_MS = tostring(c.max_latency_ms) },
+        c.body_contains == null ? {} : { API_BODY_CONTAINS = c.body_contains },
+        c.json_assertions == null ? {} : { API_JSON_ASSERTIONS = jsonencode(c.json_assertions) },
+        c.request_headers == null ? {} : { API_REQUEST_HEADERS = jsonencode(c.request_headers) },
+        c.request_body == null ? {} : { API_REQUEST_BODY = c.request_body },
+      )
     }
   }
 }
