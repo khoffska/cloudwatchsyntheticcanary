@@ -32,6 +32,16 @@ jobs:
         terraform_version: latest
         terraform_wrapper: false
 
+    - name: Setup CUE
+      env:
+        CUE_VERSION: '0.13.0'
+      run: |
+        curl -sL "https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz" \
+          | tar -xz -C /usr/local/bin cue
+
+    - name: Generate cloudwatch_map from CUE
+      run: cue export ./cue --out json > cloudwatch_map.auto.tfvars.json
+
     - name: Terraform Init
       run: terraform init
 

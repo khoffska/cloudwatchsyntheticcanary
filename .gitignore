@@ -370,3 +370,6 @@ FodyWeavers.xsd
 # Canary deployment zips are built from src/*.py by data.archive_file — not committed
 /build/
 src/*.zip
+
+# cloudwatch_map is compiled from cue/*.cue in CI — not committed
+cloudwatch_map.auto.tfvars.json
