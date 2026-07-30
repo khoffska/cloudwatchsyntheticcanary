@@ -30,64 +30,10 @@ variable "cloudwatch_map" {
     api_key_secret_json_key = optional(string) # if the secret is JSON, the key holding the api key
     api_key                 = optional(string) # plaintext fallback — avoid for real secrets
   }))
-  default = {
-    "google" = {
-      name            = "google"
-      sns_topic_email = "hoffstad@gmail.com"
-    },
-    "youtube" = {
-      name            = "youtube"
-      sns_topic_email = "discwat@gmail.com"
-    },
-    "httpbin-api" = {
-      name            = "httpbin-api"
-      sns_topic_email = "hoffstad@gmail.com"
-      type            = "api"
-      endpoint        = "https://httpbin.org/status/200"
-      expected_status = 200
-      max_latency_ms  = 3000
-    },
-    "httpbin-json" = {
-      name            = "httpbin-json"
-      sns_topic_email = "hoffstad@gmail.com"
-      type            = "api"
-      endpoint        = "https://httpbin.org/json"
-      expected_status = 200
-      max_latency_ms  = 3000
-      body_contains   = "slideshow"
-      json_assertions = {
-        "slideshow.title" = "Sample Slide Show"
-      }
-    },
-    # Domino Data Lab canaries — placeholders, disabled until a real deployment
-    # URL + API key are available. Flip start_canary = true once set. They launch
-    # compute, so keep the schedule infrequent.
-    "domino-start-job" = {
-      name                = "domino-start-job"
-      sns_topic_email     = "hoffstad@gmail.com"
-      type                = "domino"
-      endpoint            = "https://REPLACE-ME.domino.example.com" # Domino host, no trailing path
-      api_key_secret_arn  = "arn:aws:secretsmanager:us-east-1:779315395291:secret:domino/api-key-REPLACE"
-      project_id          = "REPLACE_WITH_PROJECT_ID"
-      domino_action       = "job"
-      run_command         = "main.py"
-      max_latency_ms      = 10000
-      start_canary        = false
-      schedule_expression = "rate(1 hour)"
-    },
-    "domino-start-workspace" = {
-      name                = "domino-start-workspace"
-      sns_topic_email     = "hoffstad@gmail.com"
-      type                = "domino"
-      endpoint            = "https://REPLACE-ME.domino.example.com"
-      api_key_secret_arn  = "arn:aws:secretsmanager:us-east-1:779315395291:secret:domino/api-key-REPLACE"
-      project_id          = "REPLACE_WITH_PROJECT_ID"
-      domino_action       = "workspace"
-      max_latency_ms      = 15000
-      start_canary        = false
-      schedule_expression = "rate(1 hour)"
-    }
-  }
+  # No default: the canary configs live in ../cue/*.cue and are compiled to
+  # cloudwatch_map.auto.tfvars.json in CI (see .github/workflows/deploy_and_run.yml)
+  # before `terraform plan`/`apply` run. The validation blocks below stay as a
+  # second, independent check in case that file is ever hand-edited.
 
   validation {
     condition     = alltrue([for c in var.cloudwatch_map : contains(["browser", "api", "domino"], c.type)])
