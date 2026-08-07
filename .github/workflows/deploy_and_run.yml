@@ -42,6 +42,30 @@ jobs:
     - name: Generate cloudwatch_map from CUE
       run: cue export ./cue --out json > cloudwatch_map.auto.tfvars.json
 
+    # Repo stays public-safe: committed config uses placeholder emails; real
+    # alarm recipients are injected here from repo secrets. Missing secrets
+    # (e.g. a fork) fall back to the placeholders.
+    - name: Inject alarm emails from secrets
+      run: |
+        python3 - <<'EOF'
+        import json, os
+        with open("cloudwatch_map.auto.tfvars.json") as f:
+            data = json.load(f)
+        primary = os.environ.get("SNS_EMAIL_PRIMARY", "")
+        secondary = os.environ.get("SNS_EMAIL_SECONDARY", "")
+        for c in data.get("cloudwatch_map", {}).values():
+            email = c.get("sns_topic_email", "")
+            if email == "alerts-primary@example.com" and primary:
+                c["sns_topic_email"] = primary
+            elif email == "alerts-secondary@example.com" and secondary:
+                c["sns_topic_email"] = secondary
+        with open("cloudwatch_map.auto.tfvars.json", "w") as f:
+            json.dump(data, f)
+        EOF
+      env:
+        SNS_EMAIL_PRIMARY: ${{ secrets.SNS_EMAIL_PRIMARY }}
+        SNS_EMAIL_SECONDARY: ${{ secrets.SNS_EMAIL_SECONDARY }}
+
     - name: Terraform Init
       run: terraform init
 
