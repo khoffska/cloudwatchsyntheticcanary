@@ -1,0 +1,15 @@
+name: Debug account hash
+on: workflow_dispatch
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Account ID hash
+        env:
+          ACC: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo -n "$ACC" | md5sum
+          echo -n "$ACC" | wc -c
