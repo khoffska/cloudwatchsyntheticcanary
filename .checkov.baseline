@@ -4,37 +4,7 @@
             "file": "/modules/synthetic-canary/main.tf",
             "findings": [
                 {
-                    "resource": "module.canary[\"domino-start-job\"].aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                },
-                {
-                    "resource": "module.canary[\"domino-start-workspace\"].aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                },
-                {
-                    "resource": "module.canary[\"google\"].aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                },
-                {
-                    "resource": "module.canary[\"httpbin-api\"].aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                },
-                {
-                    "resource": "module.canary[\"httpbin-json\"].aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                },
-                {
-                    "resource": "module.canary[\"youtube\"].aws_sns_topic.this",
+                    "resource": "module.canary.aws_sns_topic.this",
                     "check_ids": [
                         "CKV_AWS_26"
                     ]
