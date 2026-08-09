@@ -1,0 +1,36 @@
+name: Release
+
+# Cut a release:  git tag v1.2.3 && git push origin v1.2.3
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # need history for the changelog
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            { echo "## Changes since $PREV"; echo; git log --oneline --no-merges "$PREV..HEAD"; } > /tmp/release-body.md
+          else
+            { echo "## Changes"; echo; git log --oneline --no-merges; } > /tmp/release-body.md
+          fi
+          cat /tmp/release-body.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Release $GITHUB_REF_NAME" \
+            --notes-file /tmp/release-body.md
