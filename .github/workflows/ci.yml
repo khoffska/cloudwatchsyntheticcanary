@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+    tags: ["v*"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write # only the plan job uses OIDC; checks job ignores it
+  contents: read
+
+jobs:
+  checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: latest
+          terraform_wrapper: false
+
+      - name: Setup CUE
+        env:
+          CUE_VERSION: '0.13.0'
+        run: |
+          curl -sL "https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin cue
+
+      - name: Setup TFLint
+        run: |
+          curl -sL -o /tmp/tflint.zip https://github.com/terraform-linters/tflint/releases/download/v0.54.0/tflint_linux_amd64.zip
+          unzip -o /tmp/tflint.zip -d /usr/local/bin tflint
+
+      - name: CUE config validates and exports
+        run: |
+          cue vet ./cue
+          cue export ./cue --out json > /tmp/cloudwatch_map.json
+          python3 - <<'EOF'
+          import json
+          d = json.load(open("/tmp/cloudwatch_map.json"))
+          assert d.get("cloudwatch_map"), "empty cloudwatch_map"
+          print(f"cue ok, canaries: {len(d['cloudwatch_map'])}")
+          EOF
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform validate
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: TFLint
+        run: |
+          tflint --init
+          tflint -f compact
+
+      - name: Checkov (baselined findings skipped, new ones fail)
+        run: |
+          pip install checkov
+          checkov -d . --baseline .checkov.baseline --download-external-modules false
+
+  plan:
+    name: Terraform plan (PR only — never applies)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-oidc-role
+          aws-region: us-east-1
+          role-session-name: GitHubActionsSyntheticCanaryPlan
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: latest
+          terraform_wrapper: false
+
+      - name: Setup CUE
+        env:
+          CUE_VERSION: '0.13.0'
+        run: |
+          curl -sL "https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin cue
+
+      - name: Generate cloudwatch_map from CUE
+        run: cue export ./cue --out json > cloudwatch_map.auto.tfvars.json
+
+      # Same injection as deploy_and_run.yml so PR plans match what apply will do.
+      - name: Inject alarm emails from secrets
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          with open("cloudwatch_map.auto.tfvars.json") as f:
+              data = json.load(f)
+          primary = os.environ.get("SNS_EMAIL_PRIMARY", "")
+          secondary = os.environ.get("SNS_EMAIL_SECONDARY", "")
+          for c in data.get("cloudwatch_map", {}).values():
+              email = c.get("sns_topic_email", "")
+              if email == "alerts-primary@example.com" and primary:
+                  c["sns_topic_email"] = primary
+              elif email == "alerts-secondary@example.com" and secondary:
+                  c["sns_topic_email"] = secondary
+          with open("cloudwatch_map.auto.tfvars.json", "w") as f:
+              json.dump(data, f)
+          EOF
+        env:
+          SNS_EMAIL_PRIMARY: ${{ secrets.SNS_EMAIL_PRIMARY }}
+          SNS_EMAIL_SECONDARY: ${{ secrets.SNS_EMAIL_SECONDARY }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -no-color -out=tfplan
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
+          if-no-files-found: error
