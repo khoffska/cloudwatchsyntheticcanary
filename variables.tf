@@ -22,6 +22,7 @@ variable "cloudwatch_map" {
     request_body    = optional(string)      # raw request body for POST/PUT
     # Domino Data Lab options (type == "domino").
     project_id    = optional(string) # target Domino project id
+    workspace_id  = optional(string) # target Domino workspace id (required when domino_action = "workspace")
     domino_action = optional(string) # "job" | "workspace" (default "job")
     run_command   = optional(string) # job run command (default "main.py")
     cleanup       = optional(bool)   # stop the started job/workspace afterward (default true)

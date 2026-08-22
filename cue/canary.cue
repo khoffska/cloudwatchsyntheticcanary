@@ -24,6 +24,7 @@ package canary
 
 	// Domino Data Lab options (type == "domino").
 	project_id?:    string
+	workspace_id?:  string // required when domino_action == "workspace"
 	domino_action?: "job" | "workspace"
 	run_command?:   string
 	cleanup?:       bool
@@ -45,6 +46,9 @@ package canary
 	if type == "domino" {
 		endpoint!:   string & !=""
 		project_id!: string & !=""
+		if domino_action == "workspace" {
+			workspace_id!: string & !=""
+		}
 		if api_key_secret_arn == _|_ && api_key == _|_ {
 			// Neither key source is set. Force one required so export fails
 			// with an "incomplete value" error -- same trick as the "at

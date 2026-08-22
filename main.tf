@@ -29,9 +29,10 @@ locals {
           c.request_body == null ? {} : { API_REQUEST_BODY = c.request_body },
           ) : c.type == "domino" ? merge(
           {
-            DOMINO_HOST       = c.endpoint
-            DOMINO_PROJECT_ID = c.project_id
-            DOMINO_ACTION     = coalesce(c.domino_action, "job")
+            DOMINO_HOST         = c.endpoint
+            DOMINO_PROJECT_ID   = c.project_id
+            DOMINO_ACTION       = coalesce(c.domino_action, "job")
+            DOMINO_WORKSPACE_ID = c.workspace_id
           },
           # Prefer the Secrets Manager path; only fall back to plaintext if no secret ARN is set.
           c.api_key_secret_arn != null ? { DOMINO_API_KEY_SECRET_ID = c.api_key_secret_arn } : (c.api_key == null ? {} : { DOMINO_API_KEY = c.api_key }),
