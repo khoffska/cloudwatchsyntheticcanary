@@ -1,38 +1,49 @@
 {
-    "failed_checks": [
+  "failed_checks": [
+    {
+      "file": "/modules/synthetic-canary/main.tf",
+      "findings": [
         {
-            "file": "/modules/synthetic-canary/main.tf",
-            "findings": [
-                {
-                    "resource": "module.canary.aws_sns_topic.this",
-                    "check_ids": [
-                        "CKV_AWS_26"
-                    ]
-                }
-            ]
+          "resource": "module.canary.aws_sns_topic.this",
+          "check_ids": [
+            "CKV_AWS_26"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "/s3.tf",
+      "findings": [
+        {
+          "resource": "aws_s3_bucket.canary_output",
+          "check_ids": [
+            "CKV2_AWS_6",
+            "CKV2_AWS_61",
+            "CKV2_AWS_62",
+            "CKV_AWS_144",
+            "CKV_AWS_145",
+            "CKV_AWS_18",
+            "CKV_AWS_21"
+          ]
         },
         {
-            "file": "/s3.tf",
-            "findings": [
-                {
-                    "resource": "aws_s3_bucket.canary_output",
-                    "check_ids": [
-                        "CKV2_AWS_6",
-                        "CKV2_AWS_61",
-                        "CKV2_AWS_62",
-                        "CKV_AWS_144",
-                        "CKV_AWS_145",
-                        "CKV_AWS_18",
-                        "CKV_AWS_21"
-                    ]
-                },
-                {
-                    "resource": "aws_s3_bucket_ownership_controls.canary_output",
-                    "check_ids": [
-                        "CKV2_AWS_65"
-                    ]
-                }
-            ]
+          "resource": "aws_s3_bucket_ownership_controls.canary_output",
+          "check_ids": [
+            "CKV2_AWS_65"
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "file": "/vpc.tf",
+      "findings": [
+        {
+          "resource": "aws_security_group.canary[0]",
+          "check_ids": [
+            "CKV2_AWS_5"
+          ]
+        }
+      ]
+    }
+  ]
 }

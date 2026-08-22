@@ -29,6 +29,8 @@ variable "cloudwatch_map" {
     api_key_secret_arn      = optional(string) # Secrets Manager secret ARN read at runtime (preferred)
     api_key_secret_json_key = optional(string) # if the secret is JSON, the key holding the api key
     api_key                 = optional(string) # plaintext fallback — avoid for real secrets
+    # Run this canary inside the AFT shared VPC (internal/private endpoints).
+    vpc_enabled = optional(bool, false)
   }))
   # No default: the canary configs live in ../cue/*.cue and are compiled to
   # cloudwatch_map.auto.tfvars.json in CI (see .github/workflows/deploy_and_run.yml)
