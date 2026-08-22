@@ -24,6 +24,22 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable "domino" {
+  type = object({
+    endpoint         = string                  # required: Domino host base URL, e.g. https://domino.example.com
+    project_id       = string                  # required: target Domino project id
+    workspace_id     = optional(string)        # required when action = "workspace" — target workspace id
+    action           = optional(string, "job") # "job" | "workspace"
+    run_command      = optional(string)        # job run command (default "main.py")
+    cleanup          = optional(bool, true)    # stop what we started so no paid compute is left running
+    max_latency_ms   = optional(number)        # fail if start request exceeds this
+    api_key_ssm_name = optional(string)        # SSM Parameter Store param name (SecureString, preferred)
+    api_key          = optional(string)        # plaintext fallback — avoid for real secrets
+  })
+  description = "Domino Data Lab monitoring config. Required when type = \"domino\". Builds the DOMINO_* runtime env vars automatically."
+  default     = null
+}
+
 variable "execution_role_arn" {
   type        = string
   description = "ARN of the IAM role the canary assumes when it runs."
