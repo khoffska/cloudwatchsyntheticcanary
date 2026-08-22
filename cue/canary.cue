@@ -33,6 +33,9 @@ package canary
 	api_key_secret_json_key?: string
 	api_key?:                 string
 
+	// Run this canary inside the AFT shared VPC (internal/private endpoints).
+	vpc_enabled?: bool
+
 	if type == "api" {
 		// "!" upgrades an optional field to required-and-concrete, so cue
 		// export fails if an api canary omits endpoint.

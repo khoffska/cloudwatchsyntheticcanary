@@ -59,4 +59,6 @@ module "canary" {
 
   execution_role_arn = aws_iam_role.canary.arn
   artifact_s3_bucket = aws_s3_bucket.canary_output.bucket
+
+  vpc_config = local.canary_vpc_config
 }
