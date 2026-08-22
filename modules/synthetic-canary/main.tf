@@ -1,3 +1,22 @@
+# Build the DOMINO_* runtime env vars from the optional domino object so
+# callers can pass `domino = {}` instead of hand-assembling env vars.
+locals {
+  domino_env = var.domino == null ? {} : merge(
+    {
+      DOMINO_HOST       = var.domino.endpoint
+      DOMINO_PROJECT_ID = var.domino.project_id
+      DOMINO_ACTION     = var.domino.action
+    },
+    var.domino.workspace_id != null ? { DOMINO_WORKSPACE_ID = var.domino.workspace_id } : {},
+    var.domino.api_key_ssm_name != null ? { DOMINO_API_KEY_SSM_NAME = var.domino.api_key_ssm_name } : (
+      var.domino.api_key != null ? { DOMINO_API_KEY = var.domino.api_key } : {}
+    ),
+    var.domino.run_command != null ? { DOMINO_RUN_COMMAND = var.domino.run_command } : {},
+    var.domino.cleanup != null ? { DOMINO_CLEANUP = tostring(var.domino.cleanup) } : {},
+    var.domino.max_latency_ms != null ? { DOMINO_MAX_LATENCY_MS = tostring(var.domino.max_latency_ms) } : {},
+  )
+}
+
 resource "aws_synthetics_canary" "this" {
   name                 = var.name
   artifact_s3_location = "s3://${var.artifact_s3_bucket}/"
@@ -12,9 +31,9 @@ resource "aws_synthetics_canary" "this" {
   }
 
   dynamic "run_config" {
-    for_each = length(var.environment_variables) > 0 ? [1] : []
+    for_each = length(merge(var.environment_variables, local.domino_env)) > 0 ? [1] : []
     content {
-      environment_variables = var.environment_variables
+      environment_variables = merge(var.environment_variables, local.domino_env)
     }
   }
 
