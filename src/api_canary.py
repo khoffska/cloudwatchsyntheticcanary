@@ -77,7 +77,12 @@ def main():
     http = urllib3.PoolManager()
 
     start = time.monotonic()
-    response = http.request(method, endpoint, headers=headers, body=body)
+    # Hard timeout so a stalled connection fails fast instead of hanging until
+    # the Lambda timeout kills the canary mid-run (no results, no S3 artifacts).
+    response = http.request(
+        method, endpoint, headers=headers, body=body,
+        timeout=urllib3.Timeout(connect=5, read=15),
+    )
     latency_ms = (time.monotonic() - start) * 1000
     logger.info(f"Response status: {response.status} in {latency_ms:.0f} ms")
 
