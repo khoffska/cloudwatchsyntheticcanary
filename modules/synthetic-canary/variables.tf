@@ -83,6 +83,12 @@ variable "delete_lambda" {
   default     = true
 }
 
+variable "timeout_in_seconds" {
+  type        = number
+  description = "Canary execution timeout in seconds. Must exceed the workspace poll timeout (DOMINO_WORKSPACE_POLL_TIMEOUT_SECONDS, default 240) plus start time, or the Lambda is killed mid-poll."
+  default     = 600
+}
+
 variable "alarm_comparison_operator" {
   type        = string
   description = "Comparison operator for the success-percent alarm."

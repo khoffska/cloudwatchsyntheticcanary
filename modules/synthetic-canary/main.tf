@@ -34,6 +34,7 @@ resource "aws_synthetics_canary" "this" {
     for_each = length(merge(var.environment_variables, local.domino_env)) > 0 ? [1] : []
     content {
       environment_variables = merge(var.environment_variables, local.domino_env)
+      timeout_in_seconds    = var.timeout_in_seconds
     }
   }
 
