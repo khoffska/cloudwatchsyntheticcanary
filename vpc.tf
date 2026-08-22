@@ -42,6 +42,7 @@ resource "aws_security_group" "canary" {
   vpc_id      = data.aws_ssm_parameter.vpc_id[0].value
 
   egress {
+    description = "HTTPS to Domino/SSM/S3/Logs/X-Ray via NAT"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -49,6 +50,7 @@ resource "aws_security_group" "canary" {
   }
 
   egress {
+    description = "DNS (UDP) to VPC resolver"
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
@@ -56,6 +58,7 @@ resource "aws_security_group" "canary" {
   }
 
   egress {
+    description = "DNS (TCP) to VPC resolver"
     from_port   = 53
     to_port     = 53
     protocol    = "tcp"
