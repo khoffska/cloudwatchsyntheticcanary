@@ -43,6 +43,7 @@ cloudwatch_map: {
 		endpoint:            "https://REPLACE-ME.domino.example.com"
 		api_key_secret_arn:  "arn:aws:secretsmanager:us-east-1:123456789012:secret:domino/api-key-REPLACE"
 		project_id:          "REPLACE_WITH_PROJECT_ID"
+		workspace_id:        "REPLACE_WITH_WORKSPACE_ID"
 		domino_action:       "workspace"
 		max_latency_ms:      15000
 		start_canary:        false
