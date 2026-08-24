@@ -13,6 +13,7 @@ variable "cloudwatch_map" {
     method              = optional(string, "GET")
     start_canary        = optional(bool, true) # set false to create but not run (e.g. placeholder targets)
     schedule_expression = optional(string)     # per-canary override; defaults to rate(5 minutes)
+    timeout_in_seconds  = optional(number)     # per-canary run timeout; AWS caps 300s on <=5min schedules
     # Optional API response assertions (type == "api"). Any unset check is skipped.
     expected_status = optional(number)      # assert an exact status code instead of any 2xx
     max_latency_ms  = optional(number)      # fail if the response is slower than this (also used by "domino")

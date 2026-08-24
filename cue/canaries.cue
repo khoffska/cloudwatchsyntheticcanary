@@ -10,6 +10,7 @@ cloudwatch_map: {
 		endpoint:        "https://httpbin.org/status/200"
 		expected_status: 200
 		max_latency_ms:  3000
+		timeout_in_seconds: 300
 	}
 
 	"httpbin-json": {
@@ -20,6 +21,7 @@ cloudwatch_map: {
 		max_latency_ms:  3000
 		body_contains:   "slideshow"
 		json_assertions: "slideshow.title": "Sample Slide Show"
+		timeout_in_seconds: 300
 	}
 
 	// Domino Data Lab canaries -- placeholders, disabled until a real
@@ -35,6 +37,7 @@ cloudwatch_map: {
 		max_latency_ms:      10000
 		start_canary:        false
 		schedule_expression: "rate(1 hour)"
+		timeout_in_seconds:  600
 	}
 
 	"domino-start-workspace": {
@@ -48,5 +51,6 @@ cloudwatch_map: {
 		max_latency_ms:      15000
 		start_canary:        false
 		schedule_expression: "rate(1 hour)"
+		timeout_in_seconds:  600
 	}
 }

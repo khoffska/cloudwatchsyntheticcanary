@@ -37,6 +37,12 @@ package canary
 	// Run this canary inside the AFT shared VPC (internal/private endpoints).
 	vpc_enabled?: bool
 
+	// Execution timeout in seconds. AWS caps this at 300s for canaries on a
+	// <=5-minute schedule (the default rate(5 minutes)); domino canaries on a
+	// rate(1 hour) schedule can go up to 840s and NEED the headroom (workspace
+	// poll timeout default 240s + start time). Set explicitly per canary.
+	timeout_in_seconds?: number
+
 	if type == "api" {
 		// "!" upgrades an optional field to required-and-concrete, so cue
 		// export fails if an api canary omits endpoint.
