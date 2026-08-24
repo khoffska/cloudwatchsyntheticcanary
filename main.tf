@@ -57,6 +57,10 @@ module "canary" {
   environment_variables = local.canaries[each.key].environment_variables
   start_canary          = each.value.start_canary
   schedule_expression   = coalesce(each.value.schedule_expression, "rate(5 minutes)")
+  # Per-canary execution timeout (AWS caps 300s on <=5min schedules; domino
+  # needs 600 for the workspace poll). Module default stays 600 for backward
+  # compat with direct module users; this repo always sets it explicitly.
+  timeout_in_seconds = coalesce(each.value.timeout_in_seconds, 300)
 
   execution_role_arn = aws_iam_role.canary.arn
   artifact_s3_bucket = aws_s3_bucket.canary_output.bucket
