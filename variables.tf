@@ -1,3 +1,16 @@
+variable "conf" {
+  type = object({
+    environment = string # "prod" | "stage" — selects the domino values from local.domino_envs in main.tf
+  })
+  description = "Deployment config. conf.environment picks the per-environment Domino endpoint/project_id/workspace_id."
+  default     = { environment = "prod" } # repo deploys to the real account; stage deploys override via -var/tfvars
+
+  validation {
+    condition     = contains(["prod", "stage"], var.conf.environment)
+    error_message = "conf.environment must be \"prod\" or \"stage\" (add your env to local.domino_envs in main.tf first)."
+  }
+}
+
 variable "artifact_bucket_name" {
   type        = string
   description = "Name of the shared S3 bucket that stores canary run artifacts."

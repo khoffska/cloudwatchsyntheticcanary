@@ -26,6 +26,9 @@ cloudwatch_map: {
 
 	// Domino Data Lab canaries -- placeholders, disabled until a real
 	// deployment URL + secret are available. Flip start_canary to true once set.
+	// NOTE: endpoint / project_id / workspace_id here are schema-required
+	// placeholders only — the effective values come from local.domino_envs in
+	// main.tf, selected by var.conf.environment (prod/stage).
 	"domino-start-job": {
 		type:                "domino"
 		sns_topic_email:     "alerts-primary@example.com"

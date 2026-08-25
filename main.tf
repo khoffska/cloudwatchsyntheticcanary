@@ -8,6 +8,25 @@ locals {
     )
   }
 
+  # Per-environment Domino values. endpoint / project_id / workspace_id differ
+  # between prod and stage, so they live here, selected by var.conf.environment,
+  # instead of in cue/canaries.cue — the CUE values for these three fields are
+  # schema-required placeholders and never reach the runtime. (Values below are
+  # placeholders — fill in the real ones.)
+  domino_envs = {
+    prod = {
+      endpoint     = "https://domino.prod.example.com"
+      project_id   = "proj-prod-123"
+      workspace_id = "xyz"
+    }
+    stage = {
+      endpoint     = "https://domino.stage.example.com"
+      project_id   = "proj-stage-456"
+      workspace_id = "abc"
+    }
+  }
+  domino_env = local.domino_envs[var.conf.environment]
+
   canaries = {
     for k, c in var.cloudwatch_map : k => {
       source_name = local.source_names[k]
@@ -29,10 +48,10 @@ locals {
           c.request_body == null ? {} : { API_REQUEST_BODY = c.request_body },
           ) : c.type == "domino" ? merge(
           {
-            DOMINO_HOST         = c.endpoint
-            DOMINO_PROJECT_ID   = c.project_id
+            DOMINO_HOST         = local.domino_env.endpoint
+            DOMINO_PROJECT_ID   = local.domino_env.project_id
             DOMINO_ACTION       = coalesce(c.domino_action, "job")
-            DOMINO_WORKSPACE_ID = c.workspace_id
+            DOMINO_WORKSPACE_ID = local.domino_env.workspace_id
           },
           # Prefer the Secrets Manager path; only fall back to plaintext if no secret ARN is set.
           c.api_key_secret_arn != null ? { DOMINO_API_KEY_SECRET_ID = c.api_key_secret_arn } : (c.api_key == null ? {} : { DOMINO_API_KEY = c.api_key }),
